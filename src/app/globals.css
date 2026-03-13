@@ -1,0 +1,911 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap");
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: rgb(0, 0, 0);
+  color: #fff;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* Детективний стиль скролбара — темний трек, виразний ползунок */
+.scroll-detective,
+.block-gif.game-page .txt-block,
+.modal-box,
+.resume-page .resume-grid,
+.playground,
+.playground-wrap {
+  scrollbar-width: thin;
+  scrollbar-color: #6b2d2d #1a1614;
+}
+
+.scroll-detective::-webkit-scrollbar,
+.block-gif.game-page .txt-block::-webkit-scrollbar,
+.modal-box::-webkit-scrollbar,
+.resume-page .resume-grid::-webkit-scrollbar,
+.playground::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Горизонтальний скрол для карток — видимий скролбар знизу */
+.playground-wrap::-webkit-scrollbar {
+  width: 6px;
+  height: 10px;
+}
+
+.scroll-detective::-webkit-scrollbar-track,
+.block-gif.game-page .txt-block::-webkit-scrollbar-track,
+.modal-box::-webkit-scrollbar-track,
+.resume-page .resume-grid::-webkit-scrollbar-track,
+.playground::-webkit-scrollbar-track,
+.playground-wrap::-webkit-scrollbar-track {
+  background: #1a1614;
+  border-radius: 2px;
+}
+
+.scroll-detective::-webkit-scrollbar-thumb,
+.block-gif.game-page .txt-block::-webkit-scrollbar-thumb,
+.modal-box::-webkit-scrollbar-thumb,
+.resume-page .resume-grid::-webkit-scrollbar-thumb,
+.playground::-webkit-scrollbar-thumb,
+.playground-wrap::-webkit-scrollbar-thumb {
+  background: #6b2d2d;
+  border-radius: 2px;
+  min-height: 24px;
+}
+
+.scroll-detective::-webkit-scrollbar-thumb:hover,
+.block-gif.game-page .txt-block::-webkit-scrollbar-thumb:hover,
+.modal-box::-webkit-scrollbar-thumb:hover,
+.resume-page .resume-grid::-webkit-scrollbar-thumb:hover,
+.playground::-webkit-scrollbar-thumb:hover,
+.playground-wrap::-webkit-scrollbar-thumb:hover {
+  background: #8b3d3d;
+}
+
+/* Фон з GIF та затемненням (як у прототипі) */
+.block-gif {
+  background: url("/bg-main.gif") center/cover no-repeat;
+  min-height: 100vh;
+  width: 100%;
+  box-shadow: 10px -40px 50px rgb(0, 0, 0) inset;
+}
+
+/* Сторінка гри — адаптивний потік, контент скролиться */
+.block-gif.game-page {
+  min-height: 100vh;
+  padding-bottom: 2rem;
+  position: relative;
+}
+
+/* Кількість підозрюваних — зліва зверху */
+.game-suspect-count {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10;
+}
+
+/* Контейнер гри: обмежена ширина, вертикальний потік */
+.game-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(4rem, 18vh, 7rem) 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+/* Блок опису справи — вище, ширший */
+.game-layout__story {
+  width: 100%;
+  max-width: min(90%, 85ch);
+  color: #fff;
+  font-size: clamp(0.9375rem, 2vw + 0.5rem, 1.125rem);
+  line-height: 1.5;
+  font-weight: 700;
+  text-align: center;
+}
+
+.game-layout__story p {
+  margin: 0;
+}
+
+/* Секція карток — горизонтальний скрол */
+.game-layout__cards {
+  width: 100%;
+  margin-top: clamp(0.5rem, 4vh, 1.5rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.game-layout__cards-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1.25rem;
+  justify-content: flex-start;
+  align-items: stretch;
+  min-width: min-content;
+  padding: 0 0.25rem;
+}
+
+/* Картка підозрюваного */
+.game-card {
+  flex: 0 0 auto;
+  width: clamp(280px, 38vw, 440px);
+  min-width: 280px;
+  max-width: 440px;
+  min-height: 200px;
+  display: flex;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #3d3a39 0%, #32302f 100%);
+  color: #fff;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.game-card:hover {
+  border-color: rgb(201, 19, 19);
+  box-shadow: 0 6px 28px rgba(201, 19, 19, 0.15);
+}
+
+.game-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 1rem 1.125rem;
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(0.8125rem, 1.2vw + 0.4rem, 0.9375rem);
+  line-height: 1.45;
+}
+
+.game-card__item {
+  margin-bottom: 0.5rem;
+}
+
+.game-card__item:last-child {
+  margin-bottom: 0;
+}
+
+.game-card__item--name {
+  margin-bottom: 0.35rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.game-card__item--name .game-card__value {
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
+.game-card__label {
+  font-size: 0.75em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.game-card__value {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+}
+
+.game-card__img {
+  width: clamp(100px, 22vw, 170px);
+  min-width: 100px;
+  height: 100%;
+  min-height: 140px;
+  object-fit: cover;
+  border-radius: 0 20px 20px 0;
+  transition: transform 0.35s ease;
+}
+
+.game-card:hover .game-card__img {
+  transform: scale(1.04);
+}
+
+/* Кнопки дій */
+.game-layout__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Скролбар секції карток */
+.game-layout__cards {
+  scrollbar-width: thin;
+  scrollbar-color: #6b2d2d #1a1614;
+}
+
+/* Якщо підозрюваних більше 3 — скролбар завжди видимий */
+.game-layout__cards--scroll-visible {
+  overflow-x: scroll;
+  padding-bottom: 0.25rem;
+}
+
+.game-layout__cards--scroll-visible::-webkit-scrollbar {
+  height: 12px;
+}
+
+.game-layout__cards::-webkit-scrollbar {
+  height: 10px;
+}
+
+.game-layout__cards::-webkit-scrollbar-track {
+  background: #1a1614;
+  border-radius: 2px;
+}
+
+.game-layout__cards::-webkit-scrollbar-thumb {
+  background: #6b2d2d;
+  border-radius: 2px;
+}
+
+.game-layout__cards::-webkit-scrollbar-thumb:hover {
+  background: #8b3d3d;
+}
+
+#main {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.txt-block {
+  padding-top: 10%;
+  color: #fff;
+  width: 40%;
+  min-height: 100px;
+  margin: 0 auto;
+  font-size: 18px;
+  line-height: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.txt-block .yellow {
+  color: yellow;
+}
+
+/* Вибір складності на головній */
+.home-difficulty {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.home-difficulty__label {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.home-difficulty__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  justify-content: center;
+}
+
+.home-difficulty__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.9375rem;
+}
+
+.home-difficulty__option:hover .home-difficulty__text {
+  color: #fff;
+}
+
+.home-difficulty__input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #c41e1e;
+  cursor: pointer;
+}
+
+.home-difficulty__text {
+  transition: color 0.2s ease;
+}
+
+.footer-game {
+  margin-top: 18.5%;
+  padding-bottom: 2rem;
+}
+
+.playground {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 24px;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 16px 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.btn-block {
+  padding-top: 0.5rem;
+  flex-shrink: 0;
+}
+
+
+/* Картки підозрюваних — стиль .hero, завжди в один ряд, без скролу всередині */
+.hero {
+  width: 440px;
+  min-width: 440px;
+  height: auto;
+  flex-shrink: 0;
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.45;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #3d3a39 0%, #32302f 100%);
+  display: flex;
+  gap: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.hero:hover {
+  border-color: rgb(201, 19, 19);
+  box-shadow: 0 6px 28px rgba(201, 19, 19, 0.15);
+}
+
+.hero img {
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 20px 20px 0;
+  object-fit: cover;
+  width: 170px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.hero:hover img {
+  transform: scale(1.05);
+  border-radius: 20px;
+}
+
+.left-block {
+  padding: 20px;
+  width: 120px;
+  height: 140px;
+  justify-content: right;
+  display: flex;
+  align-items: flex-end;
+}
+
+.ul-hero {
+  list-style: none;
+  text-align: left;
+  padding: 18px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.li-hero {
+  margin-bottom: 10px;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+
+.li-hero:last-child {
+  margin-bottom: 0;
+}
+
+/* Ім'я на картці — акцент, відступ до наступного рядка як між іншими (10px) */
+.li-hero-name {
+  margin-bottom: 5px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.li-hero-name .hero-value {
+  font-size: 1.1em;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #f5ecd8;
+}
+
+.hero-label {
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-right: 4px;
+}
+
+.hero-value {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+}
+
+/* Кнопка-фліп */
+.btn-flip {
+  opacity: 1;
+  outline: 0;
+  color: #fff;
+  line-height: 40px;
+  position: relative;
+  text-align: center;
+  letter-spacing: 1px;
+  display: inline-block;
+  text-decoration: none;
+  font-family: "Open Sans", sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  min-width: 140px;
+}
+
+.btn-flip:hover::after {
+  opacity: 1;
+  transform: translateY(0) rotateX(0);
+}
+
+.btn-flip:hover::before {
+  opacity: 0;
+  transform: translateY(50%) rotateX(90deg);
+}
+
+.btn-flip::after {
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 100%;
+  color: #ffffff;
+  display: block;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+  background: #e01e1e;
+  content: attr(data-back);
+  transform: translateY(-50%) rotateX(90deg);
+  padding: 0 30px;
+  border-radius: 10px;
+}
+
+.btn-flip::before {
+  top: 0;
+  left: 0;
+  opacity: 1;
+  color: #dadada;
+  display: block;
+  padding: 0 30px;
+  line-height: 40px;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  background: #373332;
+  content: attr(data-front);
+  transform: translateY(0) rotateX(0);
+  border-radius: 10px;
+}
+
+/* Кнопка музики */
+.toggle-button {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  padding: 6px 10px;
+  border: none;
+  background-color: #484848;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  z-index: 50;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-button:hover {
+  background-color: #5a5a5a;
+}
+
+/* Модалки — у стилі прототипу */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+  animation: modalOverlayFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes modalOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-box {
+  background-color: #373332;
+  border: 1px solid #555;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalBoxScaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes modalBoxScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-box h3 {
+  color: #fff;
+  margin-bottom: 1rem;
+  font-family: "Open Sans", sans-serif;
+}
+
+.modal-box .btn-flip::before {
+  content: attr(data-front);
+}
+
+/* Сторінка особистої справи — у вигляді резюме (світлий папір як у прикладі) */
+.resume-page {
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.resume-page .link-back {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+}
+
+.resume-page .resume-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.resume-page .resume-paper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f2f4f8;
+  color: #1c1e24;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+}
+
+.resume-page .resume-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.resume-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.resume-paper {
+  background: #f2f4f8;
+  color: #1c1e24;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+}
+
+/* Верхня смуга: ім'я зліва, посада справа, тонка лінія знизу */
+.resume-top-line {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px 16px;
+  border-bottom: 1px solid #b8c0d0;
+}
+
+.resume-top-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1c1e24;
+}
+
+.resume-top-title {
+  font-size: 14px;
+  color: #4a5160;
+}
+
+/* Двоколонка: ліва — фото + особисті дані, права — ім'я велике + резюме + свідчення */
+.resume-grid {
+  display: grid;
+  grid-template-columns: 36% 1fr;
+  min-height: 320px;
+}
+
+.resume-sidebar {
+  padding: 28px 24px 32px 28px;
+  border-right: 1px solid #b8c0d0;
+}
+
+.resume-photo-wrap {
+  margin-bottom: 28px;
+}
+
+.resume-photo {
+  width: 100%;
+  max-width: 220px;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+}
+
+.resume-main {
+  padding: 28px 36px 36px 32px;
+}
+
+.resume-hero {
+  margin-bottom: 24px;
+}
+
+.resume-name {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1c1e24;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.resume-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #4a5160;
+  margin: 0;
+}
+
+.resume-section {
+  margin-bottom: 28px;
+}
+
+.resume-section:last-child {
+  margin-bottom: 0;
+}
+
+.resume-section:has(.resume-bio) {
+  min-height: 120px;
+}
+
+.resume-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1c1e24;
+  margin: 0 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #b8c0d0;
+}
+
+.resume-dl {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.resume-dl dt {
+  color: #4a5160;
+  font-weight: 600;
+  margin-top: 10px;
+  margin-bottom: 2px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.resume-dl dt:first-child {
+  margin-top: 0;
+}
+
+.resume-dl dd {
+  color: #1c1e24;
+  margin: 0;
+}
+
+.resume-bio {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #2d3548;
+  margin: 0;
+  text-align: justify;
+  max-width: 100%;
+}
+
+.resume-testimony {
+  margin: 0;
+  padding: 12px 0 0 14px;
+  border-left: 3px solid #c41e1e;
+  color: #3d4556;
+  font-size: 14px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.resume-testimony-empty {
+  color: #5c6478;
+  font-size: 13px;
+  margin: 0;
+}
+
+.resume .btn-interrogate {
+  padding: 10px 20px;
+  background: #c41e1e;
+  color: #fff;
+  border: none;
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.resume .btn-interrogate:hover {
+  background: #a01818;
+}
+
+.link-back {
+  color: #dadada;
+  font-size: 14px;
+  text-decoration: none;
+  margin-bottom: 20px;
+  display: inline-block;
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.link-back:hover {
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .txt-block {
+    width: 90%;
+    padding-top: 8%;
+  }
+
+  .game-layout {
+    padding: 1rem 0.75rem 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .game-layout__story {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .game-layout__cards-inner {
+    gap: 1rem;
+  }
+
+  .game-card {
+    width: min(380px, 85vw);
+    min-width: 260px;
+  }
+
+  .playground {
+    gap: 16px;
+    margin-top: 12%;
+    justify-content: flex-start;
+  }
+
+  .hero {
+    width: 380px;
+    min-width: 380px;
+    height: 220px;
+  }
+
+  .hero img {
+    width: 130px;
+  }
+
+  .resume-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-sidebar {
+    border-right: none;
+    border-bottom: 1px solid #b8c0d0;
+  }
+
+  .resume-top-line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 18px 20px 14px;
+  }
+
+  .resume-photo {
+    max-width: 160px;
+    height: 200px;
+  }
+}
+
+@media (max-width: 600px) {
+  .game-layout {
+    padding: 0.75rem 0.5rem 1.25rem;
+    gap: 1.25rem;
+  }
+
+  .game-card {
+    min-width: 240px;
+    width: min(320px, 92vw);
+  }
+
+  .game-card__img {
+    min-width: 80px;
+  }
+
+  .resume-main,
+  .resume-sidebar {
+    padding: 20px 18px;
+  }
+
+  .resume-name {
+    font-size: 18px;
+  }
+}

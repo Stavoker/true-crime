@@ -1,0 +1,93 @@
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
+export interface Database {
+  public: {
+    Tables: {
+      suspects: {
+        Row: {
+          id: string;
+          name: string;
+          surname: string;
+          gender: "male" | "female";
+          age: number;
+          job: string;
+          hobby: string;
+          bad_habit: string;
+          foot_size: number;
+          hair_color: string;
+          biography: string;
+          image_url: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["suspects"]["Row"], "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["suspects"]["Insert"]>;
+      };
+      cases: {
+        Row: {
+          id: string;
+          intro_text: string;
+          body_location: string;
+          tool_description: string;
+          evidence_description: string;
+          difficulty: number; // 3, 4, or 5 suspects
+          killer_id: string;
+          motive: string;
+          confession_text: string;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["cases"]["Row"], "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["cases"]["Insert"]>;
+      };
+      case_suspects: {
+        Row: {
+          id: string;
+          case_id: string;
+          suspect_id: string;
+          is_killer: boolean;
+          testimony_text: string;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["case_suspects"]["Row"], "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["case_suspects"]["Insert"]>;
+      };
+      story_intros: {
+        Row: { id: string; text: string; setting: string | null; created_at: string };
+        Insert: Omit<Database["public"]["Tables"]["story_intros"]["Row"], "id" | "created_at"> & { id?: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["story_intros"]["Insert"]>;
+      };
+      story_places: {
+        Row: { id: string; text: string; link_job: string | null; setting: string | null; created_at: string };
+        Insert: Omit<Database["public"]["Tables"]["story_places"]["Row"], "id" | "created_at"> & { id?: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["story_places"]["Insert"]>;
+      };
+      story_weapons: {
+        Row: { id: string; text: string; link_job: string | null; setting: string | null; created_at: string };
+        Insert: Omit<Database["public"]["Tables"]["story_weapons"]["Row"], "id" | "created_at"> & { id?: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["story_weapons"]["Insert"]>;
+      };
+      story_body_locations: {
+        Row: { id: string; text: string; link_job: string | null; setting: string | null; created_at: string };
+        Insert: Omit<Database["public"]["Tables"]["story_body_locations"]["Row"], "id" | "created_at"> & { id?: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["story_body_locations"]["Insert"]>;
+      };
+      story_evidence: {
+        Row: { id: string; text: string; hint_type: string; hint_value: string; created_at: string };
+        Insert: Omit<Database["public"]["Tables"]["story_evidence"]["Row"], "id" | "created_at"> & { id?: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["story_evidence"]["Insert"]>;
+      };
+    };
+  };
+}
+
+export type Suspect = Database["public"]["Tables"]["suspects"]["Row"];
+export type Case = Database["public"]["Tables"]["cases"]["Row"];
+export type CaseSuspect = Database["public"]["Tables"]["case_suspects"]["Row"];
