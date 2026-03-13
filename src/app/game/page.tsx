@@ -59,10 +59,10 @@ export default function GamePage() {
       }
       setGameCase(caseData as Case);
 
-      const { data: caseSuspects } = await supabase
+      const { data: caseSuspects } = (await supabase
         .from("case_suspects")
         .select("suspect_id")
-        .eq("case_id", caseId);
+        .eq("case_id", caseId)) as { data: { suspect_id: string }[] | null };
       if (!caseSuspects?.length) {
         setLoading(false);
         return;

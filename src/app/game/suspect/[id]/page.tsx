@@ -41,12 +41,12 @@ export default function SuspectPage() {
       setSuspect(suspectData as Suspect);
 
       if (caseId) {
-        const { data: cs } = await supabase
+        const { data: cs } = (await supabase
           .from("case_suspects")
           .select("testimony_text")
           .eq("case_id", caseId)
           .eq("suspect_id", suspectId)
-          .single();
+          .single()) as { data: { testimony_text: string } | null };
         if (cs) setTestimony(cs.testimony_text);
       }
       setLoading(false);

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabaseServer";
 import { buildCaseFromParts, selectSuspectsAndKiller } from "@/lib/caseGenerator";
+import type { CasesInsert } from "@/types/database";
 
 export async function POST(request: Request) {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -82,20 +83,22 @@ export async function POST(request: Request) {
       difficulty
     );
 
-    const { data: insertedCase, error: caseError } = await supabase
+    const casePayload: CasesInsert = {
+      intro_text: caseData.intro_text,
+      body_location: caseData.body_location,
+      tool_description: caseData.tool_description,
+      evidence_description: caseData.evidence_description,
+      difficulty: caseData.difficulty,
+      killer_id: caseData.killer_id,
+      motive: caseData.motive,
+      confession_text: caseData.confession_text,
+    };
+    const { data: insertedCase, error: caseError } = (await supabase
       .from("cases")
-      .insert({
-        intro_text: caseData.intro_text,
-        body_location: caseData.body_location,
-        tool_description: caseData.tool_description,
-        evidence_description: caseData.evidence_description,
-        difficulty: caseData.difficulty,
-        killer_id: caseData.killer_id,
-        motive: caseData.motive,
-        confession_text: caseData.confession_text,
-      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase client infers insert as never with manual Database types
+      .insert(casePayload as any)
       .select("id")
-      .single();
+      .single()) as { data: { id: string } | null; error: Error | null };
 
     if (caseError || !insertedCase?.id) {
       console.error("Case insert error:", caseError);
@@ -113,11 +116,14 @@ export async function POST(request: Request) {
       testimony_text: cs.testimony_text,
     }));
 
-    const { error: csError } = await supabase.from("case_suspects").insert(rows);
+    const { error: csError } = await supabase
+      .from("case_suspects")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase client infers insert as never with manual Database types
+      .insert(rows as any);
 
     if (csError) {
       console.error("Case suspects insert error:", csError);
-      await supabase.from("cases").delete().eq("id", caseId);
+      await (supabase.from("cases") as any).delete().eq("id", caseId);
       return NextResponse.json(
         { error: "Не вдалося прив'язати підозрюваних до справи." },
         { status: 500 }
