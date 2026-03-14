@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const difficulty = Math.min(5, Math.max(3, Number(body.difficulty) || 3));
+    const difficulty = Math.min(6, Math.max(3, Number(body.difficulty) || 3));
 
     const supabase = createServerClient();
 
@@ -114,6 +114,7 @@ export async function POST(request: Request) {
       suspect_id: cs.suspect_id,
       is_killer: cs.is_killer,
       testimony_text: cs.testimony_text,
+      ...(cs.testimony_text_2 != null && { testimony_text_2: cs.testimony_text_2 }),
     }));
 
     const { error: csError } = await supabase

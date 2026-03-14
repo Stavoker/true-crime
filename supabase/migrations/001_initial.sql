@@ -45,6 +45,9 @@ ALTER TABLE suspects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cases ENABLE ROW LEVEL SECURITY;
 ALTER TABLE case_suspects ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read suspects" ON suspects;
+DROP POLICY IF EXISTS "Allow public read cases" ON cases;
+DROP POLICY IF EXISTS "Allow public read case_suspects" ON case_suspects;
 CREATE POLICY "Allow public read suspects" ON suspects FOR SELECT USING (true);
 CREATE POLICY "Allow public read cases" ON cases FOR SELECT USING (true);
 CREATE POLICY "Allow public read case_suspects" ON case_suspects FOR SELECT USING (true);

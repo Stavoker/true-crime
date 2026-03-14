@@ -13,7 +13,7 @@ export default function NewCasePage() {
         if (typeof window === "undefined") return 3;
         const stored = window.sessionStorage.getItem("detective-game-difficulty");
         const n = stored ? parseInt(stored, 10) : 3;
-        return (n === 3 || n === 4 || n === 5) ? n : 3;
+        return (n === 3 || n === 5 || n === 6) ? n : 3;
       })();
 
       try {

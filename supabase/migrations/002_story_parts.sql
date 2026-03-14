@@ -50,6 +50,11 @@ ALTER TABLE story_weapons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE story_body_locations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE story_evidence ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read story_intros" ON story_intros;
+DROP POLICY IF EXISTS "Allow public read story_places" ON story_places;
+DROP POLICY IF EXISTS "Allow public read story_weapons" ON story_weapons;
+DROP POLICY IF EXISTS "Allow public read story_body_locations" ON story_body_locations;
+DROP POLICY IF EXISTS "Allow public read story_evidence" ON story_evidence;
 CREATE POLICY "Allow public read story_intros" ON story_intros FOR SELECT USING (true);
 CREATE POLICY "Allow public read story_places" ON story_places FOR SELECT USING (true);
 CREATE POLICY "Allow public read story_weapons" ON story_weapons FOR SELECT USING (true);

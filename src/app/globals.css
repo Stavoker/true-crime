@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Open+Sans:wght@400;600;700&family=Special+Elite&display=swap");
 
 * {
   padding: 0;
@@ -10,10 +10,31 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Noir palette */
+  --noir-bg: #0d0f12;
+  --noir-bg-soft: #12151a;
+  --noir-paper: #2a2622;
+  --noir-paper-light: #352f28;
+  --noir-ink: #e8e2d9;
+  --noir-ink-muted: #8a847a;
+  --noir-red: #8b2942;
+  --noir-red-bright: #a62d4a;
+  --noir-red-cta: #c41e1e;
+  --noir-gold: #c9a227;
+  --noir-border: #4a443c;
+  --noir-stamp: rgba(139, 41, 66, 0.15);
+}
+
+html {
+  overflow-x: hidden;
+}
+
 body {
-  background-color: rgb(0, 0, 0);
-  color: #fff;
+  background-color: var(--noir-bg);
+  color: var(--noir-ink);
   font-family: "Open Sans", sans-serif;
+  overflow-x: hidden;
 }
 
 /* Детективний стиль скролбара — темний трек, виразний ползунок */
@@ -24,7 +45,7 @@ body {
 .playground,
 .playground-wrap {
   scrollbar-width: thin;
-  scrollbar-color: #6b2d2d #1a1614;
+  scrollbar-color: var(--noir-red) var(--noir-bg-soft);
 }
 
 .scroll-detective::-webkit-scrollbar,
@@ -48,7 +69,7 @@ body {
 .resume-page .resume-grid::-webkit-scrollbar-track,
 .playground::-webkit-scrollbar-track,
 .playground-wrap::-webkit-scrollbar-track {
-  background: #1a1614;
+  background: var(--noir-bg-soft);
   border-radius: 2px;
 }
 
@@ -58,7 +79,7 @@ body {
 .resume-page .resume-grid::-webkit-scrollbar-thumb,
 .playground::-webkit-scrollbar-thumb,
 .playground-wrap::-webkit-scrollbar-thumb {
-  background: #6b2d2d;
+  background: var(--noir-red);
   border-radius: 2px;
   min-height: 24px;
 }
@@ -69,15 +90,30 @@ body {
 .resume-page .resume-grid::-webkit-scrollbar-thumb:hover,
 .playground::-webkit-scrollbar-thumb:hover,
 .playground-wrap::-webkit-scrollbar-thumb:hover {
-  background: #8b3d3d;
+  background: var(--noir-red-bright);
 }
 
-/* Фон з GIF та затемненням (як у прототипі) */
+/* Фон: темне місто, готична атмосфера (noir + таємничість) */
 .block-gif {
   background: url("/bg-main.gif") center/cover no-repeat;
   min-height: 100vh;
   width: 100%;
-  box-shadow: 10px -40px 50px rgb(0, 0, 0) inset;
+  position: relative;
+  box-shadow:
+    0 0 120px rgba(0, 0, 0, 0.7) inset,
+    0 0 60px rgba(13, 15, 18, 0.5) inset,
+    10px -40px 60px rgba(0, 0, 0, 0.55) inset;
+}
+
+/* Затемнення + легка віньєтка по краях */
+.block-gif::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 50%, transparent 40%, rgba(13, 15, 18, 0.4) 100%),
+    linear-gradient(180deg, rgba(13, 15, 18, 0.45) 0%, rgba(13, 15, 18, 0.82) 100%);
+  pointer-events: none;
 }
 
 /* Сторінка гри — адаптивний потік, контент скролиться */
@@ -87,52 +123,175 @@ body {
   position: relative;
 }
 
-/* Кількість підозрюваних — зліва зверху */
-.game-suspect-count {
+/* Верхній ряд: кількість підозрюваних + таймер */
+.game-header-row {
   position: fixed;
   top: 1rem;
   left: 1rem;
-  padding: 0.5rem 0.75rem;
-  background: rgba(0, 0, 0, 0.6);
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   z-index: 10;
+  pointer-events: none;
+}
+
+.game-header-row > * {
+  pointer-events: auto;
+}
+
+/* Кількість підозрюваних — штамп на справі (noir) */
+.game-suspect-count {
+  padding: 0.4rem 0.7rem;
+  background: var(--noir-paper);
+  color: var(--noir-ink);
+  font-family: Lora, Georgia, serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid var(--noir-red);
+  border-radius: 2px;
+  box-shadow: var(--noir-stamp) 0 2px 8px;
+}
+
+.game-timer {
+  padding: 0.4rem 0.7rem;
+  background: var(--noir-paper);
+  color: var(--noir-ink);
+  font-family: Lora, Georgia, serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  border: 2px solid var(--noir-red);
+  border-radius: 2px;
+  box-shadow: var(--noir-stamp) 0 2px 8px;
 }
 
 /* Контейнер гри: обмежена ширина, вертикальний потік */
 .game-layout {
   max-width: 1400px;
   margin: 0 auto;
-  padding: clamp(4rem, 18vh, 7rem) 1rem 2rem;
+  padding: clamp(2rem, 10vh, 4rem) 1rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
-/* Блок опису справи — вище, ширший */
+/* Блок опису справи — звіт / папір (noir), шрифт друкованої машинки */
 .game-layout__story {
   width: 100%;
   max-width: min(90%, 85ch);
-  color: #fff;
+  padding: 1.25rem 1.5rem;
+  background: var(--noir-paper);
+  border: 1px solid var(--noir-border);
+  border-left: 3px solid var(--noir-red);
+  border-radius: 4px;
+  color: var(--noir-ink);
+  font-family: "Special Elite", "Courier New", Courier, monospace;
   font-size: clamp(0.9375rem, 2vw + 0.5rem, 1.125rem);
-  line-height: 1.5;
-  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  line-height: 1.6;
+  font-weight: 500;
   text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  position: relative;
+  z-index: 1;
+}
+
+.game-layout__story::before {
+  content: "СПРАВА";
+  display: block;
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--noir-ink-muted);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
 }
 
 .game-layout__story p {
   margin: 0;
 }
 
+/* Курсор анімації друку в тексті справи */
+.game-story-typewriter-cursor {
+  display: inline-block;
+  width: 0.35em;
+  height: 1em;
+  background: var(--noir-ink);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: typewriterBlink 0.8s step-end infinite;
+}
+
+/* Обгортка секції карток зі стрілками */
+.game-layout__cards-wrap {
+  position: relative;
+  width: 100%;
+  margin-top: clamp(0.5rem, 4vh, 1.5rem);
+}
+
+/* Мінімалістичні стрілки-трикутники */
+.game-layout__cards-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--noir-paper);
+  color: var(--noir-ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--noir-border);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.game-layout__cards-arrow:hover {
+  border-color: var(--noir-red);
+  box-shadow: 0 4px 16px rgba(139, 41, 66, 0.3);
+}
+
+.game-layout__cards-arrow:active {
+  opacity: 0.9;
+}
+
+.game-layout__cards-arrow--left {
+  left: 0;
+}
+
+.game-layout__cards-arrow--right {
+  right: 0;
+}
+
+.game-layout__cards-arrow-triangle {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 8px 6px 0;
+  border-color: transparent var(--noir-ink) transparent transparent;
+}
+
+.game-layout__cards-arrow--right .game-layout__cards-arrow-triangle {
+  border-width: 6px 0 6px 8px;
+  border-color: transparent transparent transparent var(--noir-ink);
+}
+
 /* Секція карток — горизонтальний скрол */
 .game-layout__cards {
   width: 100%;
-  margin-top: clamp(0.5rem, 4vh, 1.5rem);
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 0.5rem;
@@ -149,7 +308,7 @@ body {
   padding: 0 0.25rem;
 }
 
-/* Картка підозрюваного */
+/* Картка підозрюваного — файл з справи, червона нитка (noir) */
 .game-card {
   flex: 0 0 auto;
   width: clamp(280px, 38vw, 440px);
@@ -157,19 +316,21 @@ body {
   max-width: 440px;
   min-height: 200px;
   display: flex;
-  border-radius: 20px;
-  background: linear-gradient(145deg, #3d3a39 0%, #32302f 100%);
-  color: #fff;
+  border-radius: 6px;
+  background: var(--noir-paper);
+  color: var(--noir-ink);
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--noir-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   overflow: hidden;
-  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .game-card:hover {
-  border-color: rgb(201, 19, 19);
-  box-shadow: 0 6px 28px rgba(201, 19, 19, 0.15);
+  border-color: var(--noir-red);
+  box-shadow: 0 6px 24px rgba(139, 41, 66, 0.35);
 }
 
 .game-card__list {
@@ -199,17 +360,20 @@ body {
 .game-card__item--name .game-card__value {
   font-size: 1.05em;
   font-weight: 700;
+  font-family: Lora, Georgia, serif;
+  color: var(--noir-ink);
 }
 
 .game-card__label {
-  font-size: 0.75em;
+  font-size: 0.7em;
   font-weight: 600;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.06em;
+  color: var(--noir-ink-muted);
 }
 
 .game-card__value {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--noir-ink);
   font-weight: 500;
 }
 
@@ -219,12 +383,12 @@ body {
   height: 100%;
   min-height: 140px;
   object-fit: cover;
-  border-radius: 0 20px 20px 0;
-  transition: transform 0.35s ease;
+  border-radius: 0 6px 6px 0;
+  transition: transform 0.35s ease, filter 0.3s ease;
 }
 
 .game-card:hover .game-card__img {
-  transform: scale(1.04);
+  filter: brightness(1.05);
 }
 
 /* Кнопки дій */
@@ -238,7 +402,7 @@ body {
 /* Скролбар секції карток */
 .game-layout__cards {
   scrollbar-width: thin;
-  scrollbar-color: #6b2d2d #1a1614;
+  scrollbar-color: var(--noir-red) var(--noir-bg-soft);
 }
 
 /* Якщо підозрюваних більше 3 — скролбар завжди видимий */
@@ -256,57 +420,67 @@ body {
 }
 
 .game-layout__cards::-webkit-scrollbar-track {
-  background: #1a1614;
+  background: var(--noir-bg-soft);
   border-radius: 2px;
 }
 
 .game-layout__cards::-webkit-scrollbar-thumb {
-  background: #6b2d2d;
+  background: var(--noir-red);
   border-radius: 2px;
 }
 
 .game-layout__cards::-webkit-scrollbar-thumb:hover {
-  background: #8b3d3d;
+  background: var(--noir-red-bright);
 }
 
 #main {
   margin: 0 auto;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .txt-block {
   padding-top: 10%;
-  color: #fff;
+  color: var(--noir-ink);
   width: 40%;
   min-height: 100px;
   margin: 0 auto;
   font-size: 18px;
-  line-height: 22px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+
+.txt-block--gothic {
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  color: var(--noir-ink);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .txt-block .yellow {
-  color: yellow;
+  color: var(--noir-gold);
 }
 
-/* Вибір складності на головній */
+/* Вибір складності — папка справи (noir) */
 .home-difficulty {
   margin-top: 1.5rem;
-  padding: 1rem 1.25rem;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.25rem 1.5rem;
+  background: var(--noir-paper);
+  border-radius: 4px;
+  border: 1px solid var(--noir-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .home-difficulty__label {
   margin: 0 0 0.75rem 0;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.6875rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.15em;
+  color: var(--noir-ink-muted);
 }
 
 .home-difficulty__options {
@@ -321,19 +495,24 @@ body {
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--noir-ink);
   font-size: 0.9375rem;
 }
 
 .home-difficulty__option:hover .home-difficulty__text {
-  color: #fff;
+  color: var(--noir-ink);
 }
 
 .home-difficulty__input {
   width: 1rem;
   height: 1rem;
-  accent-color: #c41e1e;
+  accent-color: var(--noir-red);
   cursor: pointer;
+}
+
+.home-difficulty__option:has(.home-difficulty__input:checked) .home-difficulty__text {
+  font-weight: 700;
+  color: var(--noir-red-bright);
 }
 
 .home-difficulty__text {
@@ -364,36 +543,36 @@ body {
 }
 
 
-/* Картки підозрюваних — стиль .hero, завжди в один ряд, без скролу всередині */
+/* Картки підозрюваних — стиль .hero (noir) */
 .hero {
   width: 440px;
   min-width: 440px;
   height: auto;
   flex-shrink: 0;
-  color: #fff;
+  color: var(--noir-ink);
   font-size: 15px;
   line-height: 1.45;
-  border-radius: 20px;
-  background: linear-gradient(145deg, #3d3a39 0%, #32302f 100%);
+  border-radius: 6px;
+  background: var(--noir-paper);
   display: flex;
   gap: 0;
   white-space: nowrap;
   cursor: pointer;
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--noir-border);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   overflow: hidden;
 }
 
 .hero:hover {
-  border-color: rgb(201, 19, 19);
-  box-shadow: 0 6px 28px rgba(201, 19, 19, 0.15);
+  border-color: var(--noir-red);
+  box-shadow: 0 6px 24px rgba(139, 41, 66, 0.35);
 }
 
 .hero img {
-  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 0 20px 20px 0;
+  transition: transform 0.35s ease, filter 0.3s ease;
+  border-radius: 0 6px 6px 0;
   object-fit: cover;
   width: 170px;
   height: 100%;
@@ -401,8 +580,7 @@ body {
 }
 
 .hero:hover img {
-  transform: scale(1.05);
-  border-radius: 20px;
+  filter: brightness(1.05);
 }
 
 .left-block {
@@ -443,36 +621,38 @@ body {
 .li-hero-name .hero-value {
   font-size: 1.1em;
   font-weight: 700;
+  font-family: Lora, Georgia, serif;
   letter-spacing: 0.03em;
-  color: #f5ecd8;
+  color: var(--noir-ink);
 }
 
 .hero-label {
-  font-size: 0.8em;
+  font-size: 0.75em;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--noir-ink-muted);
   margin-right: 4px;
 }
 
 .hero-value {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--noir-ink);
   font-weight: 500;
 }
 
-/* Кнопка-фліп */
+/* Кнопка-фліп — червона нитка (noir) */
 .btn-flip {
   opacity: 1;
   outline: 0;
-  color: #fff;
+  color: var(--noir-ink);
   line-height: 40px;
   position: relative;
   text-align: center;
-  letter-spacing: 1px;
+  letter-spacing: 0.12em;
   display: inline-block;
   text-decoration: none;
   font-family: "Open Sans", sans-serif;
+  font-weight: 600;
   text-transform: uppercase;
   cursor: pointer;
   border: none;
@@ -483,6 +663,7 @@ body {
 .btn-flip:hover::after {
   opacity: 1;
   transform: translateY(0) rotateX(0);
+  box-shadow: 0 4px 20px rgba(139, 41, 66, 0.4);
 }
 
 .btn-flip:hover::before {
@@ -490,62 +671,68 @@ body {
   transform: translateY(50%) rotateX(90deg);
 }
 
+.btn-flip:active::after {
+  transform: translateY(0) rotateX(0) scale(0.98);
+}
+
 .btn-flip::after {
   top: 0;
   left: 0;
   opacity: 0;
   width: 100%;
-  color: #ffffff;
+  color: #fff;
   display: block;
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
   position: absolute;
-  background: #e01e1e;
+  background: var(--noir-red-cta);
   content: attr(data-back);
   transform: translateY(-50%) rotateX(90deg);
   padding: 0 30px;
-  border-radius: 10px;
+  border-radius: 4px;
 }
 
 .btn-flip::before {
   top: 0;
   left: 0;
   opacity: 1;
-  color: #dadada;
+  color: var(--noir-ink-muted);
   display: block;
   padding: 0 30px;
   line-height: 40px;
   transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  background: #373332;
+  background: var(--noir-paper);
+  border: 1px solid var(--noir-border);
   content: attr(data-front);
   transform: translateY(0) rotateX(0);
-  border-radius: 10px;
+  border-radius: 4px;
 }
 
-/* Кнопка музики */
+/* Кнопка музики (noir) */
 .toggle-button {
   position: fixed;
   bottom: 20px;
   left: 20px;
-  padding: 6px 10px;
-  border: none;
-  background-color: #484848;
-  color: white;
+  padding: 8px 12px;
+  border: 1px solid var(--noir-border);
+  background: var(--noir-paper);
+  color: var(--noir-ink);
   cursor: pointer;
   border-radius: 4px;
   z-index: 50;
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .toggle-button:hover {
-  background-color: #5a5a5a;
+  border-color: var(--noir-red);
+  box-shadow: 0 2px 12px rgba(139, 41, 66, 0.25);
 }
 
-/* Модалки — у стилі прототипу */
+/* Модалки — папір справи (noir) */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -560,20 +747,21 @@ body {
 }
 
 .modal-box {
-  background-color: #373332;
-  border: 1px solid #555;
-  border-radius: 20px;
+  background: var(--noir-paper);
+  border: 1px solid var(--noir-border);
+  border-radius: 4px;
   padding: 2rem;
   max-width: 90vw;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   animation: modalBoxScaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes modalBoxScaleIn {
   from {
     opacity: 0;
-    transform: scale(0.92);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
@@ -582,56 +770,103 @@ body {
 }
 
 .modal-box h3 {
-  color: #fff;
+  color: var(--noir-ink);
   margin-bottom: 1rem;
-  font-family: "Open Sans", sans-serif;
+  font-family: Lora, Georgia, serif;
+  font-weight: 700;
 }
 
 .modal-box .btn-flip::before {
   content: attr(data-front);
 }
 
-/* Сторінка особистої справи — у вигляді резюме (світлий папір як у прикладі) */
+.modal-box button:not(.btn-flip) {
+  background: var(--noir-paper-light);
+  border: 1px solid var(--noir-border);
+  color: var(--noir-ink);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.modal-box button:not(.btn-flip):hover {
+  border-color: var(--noir-red);
+  background: var(--noir-paper);
+}
+
+/* Сторінка особистої справи — фіксована висота, внутрішній скрол лише в аркуші */
 .resume-page {
-  min-height: 100vh;
   height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 1rem 1rem 1.5rem;
+  padding: 1rem 1rem 1rem;
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+  overflow: hidden;
 }
 
 .resume-page .link-back {
-  flex-shrink: 0;
-  margin-bottom: 12px;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  background: var(--noir-paper);
+  color: var(--noir-ink-muted);
+  border: 1px solid var(--noir-border);
+  border-radius: 4px;
+  font-size: 14px;
+  text-decoration: none;
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.resume-page .link-back:hover {
+  color: var(--noir-red-bright);
+  border-color: var(--noir-red);
+  background: var(--noir-paper-light);
+}
+
+.resume-page__timer {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 20;
 }
 
 .resume-page .resume-wrap {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   max-width: 960px;
   width: 100%;
   margin: 0 auto;
+  flex: 1;
+  min-height: 0;
+  padding-top: 2.75rem;
 }
 
 .resume-page .resume-paper {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  background: #f2f4f8;
+  flex: 1;
+  min-height: 0;
+  background: #e8e0d4;
   color: #1c1e24;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid #c4b8a8;
+  overflow: hidden;
 }
 
 .resume-page .resume-grid {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .resume-wrap {
@@ -640,10 +875,10 @@ body {
 }
 
 .resume-paper {
-  background: #f2f4f8;
-  color: #1c1e24;
-  overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  background: #e8e0d4;
+  color: #252220;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid #c4b8a8;
 }
 
 /* Верхня смуга: ім'я зліва, посада справа, тонка лінія знизу */
@@ -653,18 +888,22 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 32px 16px;
-  border-bottom: 1px solid #b8c0d0;
+  border-bottom: 2px solid var(--noir-border);
 }
 
 .resume-top-name {
   font-size: 16px;
-  font-weight: 500;
-  color: #1c1e24;
+  font-weight: 600;
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+  color: #252220;
 }
 
 .resume-top-title {
-  font-size: 14px;
-  color: #4a5160;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--noir-ink-muted);
 }
 
 /* Двоколонка: ліва — фото + особисті дані, права — ім'я велике + резюме + свідчення */
@@ -676,7 +915,7 @@ body {
 
 .resume-sidebar {
   padding: 28px 24px 32px 28px;
-  border-right: 1px solid #b8c0d0;
+  border-right: 1px solid #c4b8a8;
 }
 
 .resume-photo-wrap {
@@ -731,14 +970,14 @@ body {
 }
 
 .resume-section-title {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #1c1e24;
+  color: var(--noir-ink-muted);
   margin: 0 0 10px 0;
   padding-bottom: 6px;
-  border-bottom: 1px solid #b8c0d0;
+  border-bottom: 1px solid var(--noir-border);
 }
 
 .resume-dl {
@@ -773,16 +1012,38 @@ body {
   margin: 0;
   text-align: justify;
   max-width: 100%;
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+}
+
+/* Курсор анімації друку на сторінці резюме */
+.resume-typewriter-cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  background: #252220;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: typewriterBlink 0.8s step-end infinite;
+}
+
+@keyframes typewriterBlink {
+  50% { opacity: 0; }
 }
 
 .resume-testimony {
   margin: 0;
   padding: 12px 0 0 14px;
-  border-left: 3px solid #c41e1e;
-  color: #3d4556;
+  border-left: 4px solid var(--noir-red);
+  color: #252220;
   font-size: 14px;
   line-height: 1.6;
   font-style: italic;
+  animation: testimonyFadeIn 0.35s ease-out;
+}
+
+@keyframes testimonyFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .resume-testimony-empty {
@@ -791,35 +1052,74 @@ body {
   margin: 0;
 }
 
+.resume-testimony-wait {
+  margin: 16px 0 0;
+  color: var(--noir-ink-muted);
+  font-size: 13px;
+}
+
 .resume .btn-interrogate {
   padding: 10px 20px;
-  background: #c41e1e;
+  background: var(--noir-red-cta);
   color: #fff;
   border: none;
   font-family: "Open Sans", sans-serif;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 4px;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
 }
 
 .resume .btn-interrogate:hover {
-  background: #a01818;
+  background: var(--noir-red-bright);
+  box-shadow: 0 4px 16px rgba(139, 41, 66, 0.35);
+}
+
+.resume .btn-interrogate:active {
+  transform: scale(0.98);
+}
+
+.resume .btn-interrogate--second {
+  margin-top: 16px;
+  background: transparent;
+  color: var(--noir-red-cta);
+  border: 2px solid var(--noir-red-cta);
+}
+
+.resume .btn-interrogate--second:hover {
+  background: rgba(139, 41, 66, 0.12);
+  color: var(--noir-red-bright);
+  border-color: var(--noir-red-bright);
+}
+
+.resume-testimony-label {
+  margin: 20px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--noir-ink-muted);
+}
+
+.resume-testimony--second {
+  border-left-color: var(--noir-ink-muted);
+  padding-top: 8px;
 }
 
 .link-back {
-  color: #dadada;
+  color: var(--noir-ink-muted);
   font-size: 14px;
   text-decoration: none;
   margin-bottom: 20px;
   display: inline-block;
-  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.25s ease;
 }
 
 .link-back:hover {
-  color: #fff;
+  color: var(--noir-red-bright);
 }
 
 @media (max-width: 900px) {
@@ -829,7 +1129,7 @@ body {
   }
 
   .game-layout {
-    padding: 1rem 0.75rem 1.5rem;
+    padding: 0.75rem 0.75rem 1.5rem;
     gap: 1.5rem;
   }
 
@@ -885,9 +1185,146 @@ body {
   }
 }
 
+/* Адаптація для iPad (планшети 768px–1024px): зручні відступи, зони натискання, safe area */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .game-header-row {
+    top: max(1rem, env(safe-area-inset-top));
+    left: max(1rem, env(safe-area-inset-left));
+    right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .game-layout {
+    padding: clamp(1.5rem, 6vh, 2.5rem) max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right)) 2rem;
+    gap: 1.75rem;
+  }
+
+  .game-layout__story {
+    font-size: 1rem;
+    padding: 1.25rem 1.5rem;
+    max-width: 95%;
+  }
+
+  .game-layout__cards-arrow {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .game-card {
+    width: min(360px, 48vw);
+    min-width: 300px;
+  }
+
+  .game-card__img {
+    min-width: 100px;
+  }
+
+  .game-layout__actions .btn-flip {
+    min-height: 44px;
+    padding: 0 1.25rem;
+  }
+
+  .playground {
+    padding: 20px max(1rem, env(safe-area-inset-left)) 20px max(1rem, env(safe-area-inset-right));
+    gap: 20px;
+  }
+
+  .hero {
+    width: 380px;
+    min-width: 360px;
+    height: 200px;
+  }
+
+  .hero img {
+    width: 140px;
+  }
+
+  .resume-page {
+    padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  }
+
+  .resume-page .link-back {
+    top: max(1rem, env(safe-area-inset-top));
+    left: max(1rem, env(safe-area-inset-left));
+    padding: 0.6rem 1rem;
+    min-height: 44px;
+    min-width: 44px;
+    box-sizing: border-box;
+  }
+
+  .resume-page__timer {
+    top: max(1rem, env(safe-area-inset-top));
+    right: max(1rem, env(safe-area-inset-right));
+    padding: 0.5rem 0.85rem;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .resume-page .resume-wrap {
+    padding-top: 3.25rem;
+  }
+
+  .resume-grid {
+    grid-template-columns: 32% 1fr;
+    gap: 0;
+  }
+
+  .resume-sidebar {
+    padding: 24px 20px 28px 24px;
+  }
+
+  .resume-main {
+    padding: 24px 28px 28px 28px;
+  }
+
+  .resume-bio {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .resume .btn-interrogate {
+    min-height: 44px;
+    padding: 12px 24px;
+  }
+
+  .modal-overlay {
+    padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  }
+
+  .modal-box {
+    max-height: min(85vh, calc(100vh - 2rem));
+    overflow-y: auto;
+  }
+
+  .toggle-button {
+    bottom: max(20px, env(safe-area-inset-bottom));
+    left: max(20px, env(safe-area-inset-left));
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 14px;
+  }
+
+  .txt-block {
+    width: 75%;
+    padding-top: 8%;
+    font-size: 17px;
+  }
+
+  .home-difficulty {
+    padding: 1.25rem 1.5rem;
+    max-width: 90%;
+  }
+
+  .home-difficulty__option {
+    min-height: 44px;
+    padding: 0.25rem 0;
+  }
+}
+
 @media (max-width: 600px) {
   .game-layout {
-    padding: 0.75rem 0.5rem 1.25rem;
+    padding: 0.5rem 0.5rem 1.25rem;
     gap: 1.25rem;
   }
 

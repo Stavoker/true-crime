@@ -36,7 +36,7 @@ export interface Database {
           body_location: string;
           tool_description: string;
           evidence_description: string;
-          difficulty: number; // 3, 4, or 5 suspects
+          difficulty: number; // 3, 5, or 6 (easy / medium / hard)
           killer_id: string;
           motive: string;
           confession_text: string;
@@ -56,6 +56,7 @@ export interface Database {
           suspect_id: string;
           is_killer: boolean;
           testimony_text: string;
+          testimony_text_2: string | null;
           created_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["case_suspects"]["Row"], "id" | "created_at"> & {

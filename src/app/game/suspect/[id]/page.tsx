@@ -1,10 +1,27 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import type { Suspect } from "@/types/database";
+
+const RESUME_TYPED_KEY = "resume-typed-";
+const TYPEWRITER_MS_PER_CHAR = 28;
+const TIMER_STORAGE_PREFIX = "detective-game-timer-";
+
+function getTimeLimitSeconds(difficulty: number): number {
+  if (difficulty === 3) return 180;
+  if (difficulty === 5) return 300;
+  if (difficulty === 6) return 480;
+  return 180;
+}
+
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
 
 function getPlaceholderImage(s: { gender: string; age: number }): string {
   const isMale = s.gender === "male";
@@ -18,13 +35,98 @@ function getPlaceholderImage(s: { gender: string; age: number }): string {
 export default function SuspectPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const suspectId = params.id as string;
   const caseId = searchParams.get("caseId");
 
   const [suspect, setSuspect] = useState<Suspect | null>(null);
   const [testimony, setTestimony] = useState<string | null>(null);
+  const [testimony2, setTestimony2] = useState<string | null>(null);
+  const [caseDifficulty, setCaseDifficulty] = useState<number | null>(null);
   const [showTestimony, setShowTestimony] = useState(false);
+  const [showSecondTestimony, setShowSecondTestimony] = useState(false);
+  const [canRepeatInterrogate, setCanRepeatInterrogate] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [typedLength, setTypedLength] = useState(0);
+  const [typewriterDone, setTypewriterDone] = useState(false);
+  const typewriterStarted = useRef(false);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+
+  // Анімація друку резюме лише при першому заході на сторінку цього підозрюваного (за сесію)
+  useEffect(() => {
+    if (!suspect || loading) return;
+    const key = RESUME_TYPED_KEY + suspectId;
+    if (typeof window !== "undefined" && window.sessionStorage.getItem(key) === "1") {
+      setTypedLength(suspect.biography.length);
+      setTypewriterDone(true);
+      return;
+    }
+    if (typewriterStarted.current) return;
+    typewriterStarted.current = true;
+    const fullLen = suspect.biography.length;
+    if (fullLen === 0) {
+      setTypewriterDone(true);
+      if (typeof window !== "undefined") window.sessionStorage.setItem(key, "1");
+      return;
+    }
+    let n = 0;
+    const timer = setInterval(() => {
+      n += 1;
+      setTypedLength(n);
+      if (n >= fullLen) {
+        clearInterval(timer);
+        setTypewriterDone(true);
+        if (typeof window !== "undefined") window.sessionStorage.setItem(key, "1");
+      }
+    }, TYPEWRITER_MS_PER_CHAR);
+    return () => clearInterval(timer);
+  }, [suspect, suspectId, loading]);
+
+  // Кнопка «Допити повторно» з’являється лише через 10 с після першого допиту
+  useEffect(() => {
+    if (!showTestimony || showSecondTestimony || caseDifficulty !== 6 || !testimony2) return;
+    const t = setTimeout(() => setCanRepeatInterrogate(true), 10_000);
+    return () => clearTimeout(t);
+  }, [showTestimony, showSecondTestimony, caseDifficulty, testimony2]);
+
+  // Таймер на сторінці резюме (той самий, що на сторінці гри)
+  useEffect(() => {
+    if (!caseId || caseDifficulty === null || typeof window === "undefined") return;
+    const limit = getTimeLimitSeconds(caseDifficulty);
+    const key = TIMER_STORAGE_PREFIX + caseId;
+    let startedAt: number;
+    try {
+      const stored = sessionStorage.getItem(key);
+      if (stored) {
+        startedAt = parseInt(stored, 10);
+        if (Number.isNaN(startedAt)) startedAt = Date.now();
+      } else {
+        setTimeLeft(null);
+        return;
+      }
+    } catch {
+      setTimeLeft(null);
+      return;
+    }
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    const remaining = Math.max(0, limit - elapsed);
+    setTimeLeft(remaining);
+    if (remaining <= 0) {
+      router.replace(`/game?caseId=${caseId}`);
+      return;
+    }
+    const tick = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(tick);
+          router.replace(`/game?caseId=${caseId}`);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [caseId, caseDifficulty, router]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -41,13 +143,23 @@ export default function SuspectPage() {
       setSuspect(suspectData as Suspect);
 
       if (caseId) {
+        const { data: caseData } = (await supabase
+          .from("cases")
+          .select("difficulty")
+          .eq("id", caseId)
+          .single()) as { data: { difficulty: number } | null };
+        if (caseData) setCaseDifficulty(caseData.difficulty);
+
         const { data: cs } = (await supabase
           .from("case_suspects")
-          .select("testimony_text")
+          .select("testimony_text, testimony_text_2")
           .eq("case_id", caseId)
           .eq("suspect_id", suspectId)
-          .single()) as { data: { testimony_text: string } | null };
-        if (cs) setTestimony(cs.testimony_text);
+          .single()) as { data: { testimony_text: string; testimony_text_2: string | null } | null };
+        if (cs) {
+          setTestimony(cs.testimony_text);
+          if (cs.testimony_text_2) setTestimony2(cs.testimony_text_2);
+        }
       }
       setLoading(false);
     })();
@@ -76,6 +188,11 @@ export default function SuspectPage() {
 
   return (
     <div className="block-gif resume-page">
+      {caseId && caseDifficulty !== null && timeLeft !== null && (
+        <div className="resume-page__timer game-timer" aria-live="polite">
+          Залишилось: {formatTime(timeLeft)}
+        </div>
+      )}
       <div className="resume-wrap">
         <Link href={backHref} className="link-back">
           ← До справи
@@ -118,7 +235,10 @@ export default function SuspectPage() {
               </div>
               <section className="resume-section">
                 <h2 className="resume-section-title">Резюме</h2>
-                <p className="resume-bio">{suspect.biography}</p>
+                <p className="resume-bio">
+                  {suspect.biography.slice(0, typedLength)}
+                  {!typewriterDone && <span className="resume-typewriter-cursor" aria-hidden="true" />}
+                </p>
               </section>
               <section className="resume-section">
                 <h2 className="resume-section-title">Свідчення по справі</h2>
@@ -126,10 +246,38 @@ export default function SuspectPage() {
                   <button type="button" onClick={() => setShowTestimony(true)} className="btn-interrogate">
                     Допросити
                   </button>
-                ) : testimony ? (
-                  <blockquote className="resume-testimony">&quot;{testimony}&quot;</blockquote>
                 ) : (
-                  <p className="resume-testimony-empty">Свідчення відсутні для цієї справи.</p>
+                  <>
+                    {testimony && (
+                      <blockquote className="resume-testimony">&quot;{testimony}&quot;</blockquote>
+                    )}
+                    {caseDifficulty === 6 && testimony2 && !showSecondTestimony && (
+                      canRepeatInterrogate ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowSecondTestimony(true)}
+                          className="btn-interrogate btn-interrogate--second"
+                        >
+                          Допити повторно
+                        </button>
+                      ) : (
+                        <p className="resume-testimony-wait" aria-live="polite">
+                          Повторний допит можливий через 10 с.
+                        </p>
+                      )
+                    )}
+                    {showSecondTestimony && testimony2 && (
+                      <>
+                        <p className="resume-testimony-label">Повторний допит:</p>
+                        <blockquote className="resume-testimony resume-testimony--second">
+                          &quot;{testimony2}&quot;
+                        </blockquote>
+                      </>
+                    )}
+                    {!testimony && (
+                      <p className="resume-testimony-empty">Свідчення відсутні для цієї справи.</p>
+                    )}
+                  </>
                 )}
               </section>
             </main>

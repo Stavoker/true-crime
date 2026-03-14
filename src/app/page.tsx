@@ -7,17 +7,17 @@ const DIFFICULTY_STORAGE_KEY = "detective-game-difficulty";
 
 const DIFFICULTY_OPTIONS = [
   { value: 3, label: "Легко (3 підозрюваних)" },
-  { value: 4, label: "Середньо (4 підозрюваних)" },
-  { value: 5, label: "Складно (5 підозрюваних)" },
+  { value: 5, label: "Середньо (5 підозрюваних)" },
+  { value: 6, label: "Складно (6 підозрюваних, подвійний допит)" },
 ] as const;
 
 export default function HomePage() {
   const router = useRouter();
-  const [difficulty, setDifficulty] = useState<3 | 4 | 5>(() => {
+  const [difficulty, setDifficulty] = useState<3 | 5 | 6>(() => {
     if (typeof window === "undefined") return 3;
     const stored = window.sessionStorage.getItem(DIFFICULTY_STORAGE_KEY);
     const n = stored ? parseInt(stored, 10) : 3;
-    return (n === 3 || n === 4 || n === 5) ? n : 3;
+    return (n === 3 || n === 5 || n === 6) ? n : 3;
   });
   const [loading, setLoading] = useState(false);
 
@@ -49,9 +49,12 @@ export default function HomePage() {
   return (
     <div className="block-gif">
       <div id="main" className="min-h-screen flex flex-col items-center justify-center">
-        <div className="txt-block px-4">
+        <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-[0.2em] text-[var(--noir-ink)] uppercase mb-1 md:mb-3 mt-12 md:mt-24">
+          True Crime
+        </h1>
+        <div className="txt-block txt-block--gothic px-4">
           <p className="text-center">
-            Розслідуй злочин, збирай докази, допитуй підозрюваних. У тебе лише одна спроба назвати вбивцю.
+            Тіні зберігають таємниці. Збирай докази, допитуй підозрюваних — у тебе лише одна спроба назвати вбивцю.
           </p>
         </div>
 
