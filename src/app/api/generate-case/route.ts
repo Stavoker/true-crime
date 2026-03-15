@@ -3,6 +3,8 @@ import { createServerClient } from "@/lib/supabaseServer";
 import { buildCaseFromParts, selectSuspectsAndKiller } from "@/lib/caseGenerator";
 import type { CasesInsert } from "@/types/database";
 
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return NextResponse.json(
@@ -46,11 +48,11 @@ export async function POST(request: Request) {
       { data: body_locations },
       { data: evidence },
     ] = await Promise.all([
-      supabase.from("story_intros").select("id, text, setting"),
-      supabase.from("story_places").select("id, text, link_job, setting"),
-      supabase.from("story_weapons").select("id, text, link_job, setting"),
-      supabase.from("story_body_locations").select("id, text, link_job, setting"),
-      supabase.from("story_evidence").select("id, text, hint_type, hint_value"),
+      supabase.from("story_intros").select("id, text, setting").limit(500),
+      supabase.from("story_places").select("id, text, link_job, setting").limit(500),
+      supabase.from("story_weapons").select("id, text, link_job, setting").limit(500),
+      supabase.from("story_body_locations").select("id, text, link_job, setting").limit(500),
+      supabase.from("story_evidence").select("id, text, hint_type, hint_value").limit(500),
     ]);
 
     const parts = {
@@ -133,7 +135,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ caseId });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
+    const message = err instanceof Error ? err.message : String(err);
     if (message.includes("SUPABASE_SERVICE_ROLE_KEY")) {
       return NextResponse.json(
         { error: "Сервер не налаштований для генерації справ (відсутній service role key)." },
@@ -142,7 +144,7 @@ export async function POST(request: Request) {
     }
     console.error("Generate case error:", err);
     return NextResponse.json(
-      { error: "Помилка генерації справи." },
+      { error: "Помилка генерації справи.", details: process.env.NODE_ENV === "development" ? message : undefined },
       { status: 500 }
     );
   }

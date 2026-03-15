@@ -168,6 +168,223 @@ body {
   box-shadow: var(--noir-stamp) 0 2px 8px;
 }
 
+.game-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.game-btn-sprava {
+  padding: 0.4rem 0.7rem;
+  background: var(--noir-paper);
+  color: var(--noir-ink);
+  font-family: Lora, Georgia, serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  border: 2px solid var(--noir-red);
+  border-radius: 2px;
+  box-shadow: var(--noir-stamp) 0 2px 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.game-btn-sprava:hover {
+  background: var(--noir-paper-light);
+  border-color: var(--noir-ink-muted);
+}
+
+/* Модалка справи: затемнення як на сторінці резюме (радіальний + лінійний градієнт) */
+.story-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 50%, rgba(13, 15, 18, 0.78) 40%, rgba(13, 15, 18, 0.94) 100%),
+    linear-gradient(180deg, rgba(13, 15, 18, 0.72) 0%, rgba(13, 15, 18, 0.96) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  animation: modalOverlayFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Блок справи — чорний (noir), як загальна палітра гри */
+.story-modal-box {
+  background: var(--noir-paper);
+  border: 1px solid var(--noir-border);
+  border-left: 3px solid var(--noir-red);
+  border-radius: 4px;
+  color: var(--noir-ink);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  max-width: min(90vw, 85ch);
+  width: 100%;
+  min-height: 55vh;
+  max-height: 85vh;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalBoxScaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.story-modal-title {
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--noir-ink-muted);
+  margin: 0;
+  padding: 20px 32px 16px;
+  border-bottom: 2px solid var(--noir-border);
+  flex-shrink: 0;
+}
+
+.story-modal-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 28px 36px 1rem;
+  user-select: text;
+}
+
+.story-modal-body {
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--noir-ink);
+  margin: 0;
+  text-align: justify;
+}
+
+.story-modal-body.white-space-pre-line {
+  white-space: pre-line;
+}
+
+.story-clue-highlight {
+  background: rgba(255, 220, 100, 0.35);
+  color: inherit;
+  padding: 0 1px;
+}
+
+.story-modal-close {
+  flex-shrink: 0;
+  margin: 0 36px 28px;
+  padding: 0.6rem 1.25rem;
+  background: var(--noir-paper-light);
+  border: 1px solid var(--noir-border);
+  color: var(--noir-ink);
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.story-modal-close:hover {
+  border-color: var(--noir-red);
+  background: var(--noir-paper);
+}
+
+/* Блок зачіпок над картками: фіксована висота, макс 6 зачіпок */
+.game-clues-block {
+  width: 100%;
+  max-width: min(90%, 85ch);
+  min-height: 7rem;
+  max-height: 9rem;
+  padding: 0.75rem 1rem;
+  background: var(--noir-paper);
+  border: 1px solid var(--noir-border);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin-top: 2%;
+}
+
+.game-clues-inner {
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+
+.game-clues-placeholder {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--noir-ink-muted);
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+}
+
+.game-clue-chip {
+  padding: 0.35rem 0.65rem;
+  background: var(--noir-paper-light);
+  border: 1px solid var(--noir-border);
+  color: var(--noir-ink);
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+  font-size: 0.8125rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  max-width: 100%;
+  text-align: left;
+}
+
+.game-clue-chip:hover {
+  border-color: var(--noir-red);
+  background: var(--noir-paper);
+}
+
+/* Модалка перегляду зачіпок — чорний стиль, як блок справи */
+.view-clues-modal-box {
+  background: var(--noir-paper);
+  border: 1px solid var(--noir-border);
+  border-left: 3px solid var(--noir-red);
+  border-radius: 4px;
+  color: var(--noir-ink);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  max-width: min(90vw, 50ch);
+  width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.5rem;
+  animation: modalBoxScaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.view-clues-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.view-clues-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--noir-border);
+  color: var(--noir-ink);
+}
+
+.view-clues-list li:last-child {
+  border-bottom: none;
+}
+
+.view-clue-item {
+  font-family: "Special Elite", "Courier New", Courier, monospace;
+  font-size: 15px;
+  color: var(--noir-ink);
+  display: inline-block;
+  min-width: 28ch;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Контейнер гри: обмежена ширина, вертикальний потік */
 .game-layout {
   max-width: 1400px;
@@ -213,6 +430,36 @@ body {
   color: var(--noir-ink-muted);
   margin-bottom: 0.5rem;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+/* Заготоване місце для тексту справи — сторінка не дьоргається під час анімації друку */
+.game-layout__story-body {
+  position: relative;
+}
+
+.game-layout__story-placeholder {
+  margin: 0;
+  visibility: hidden;
+  user-select: none;
+  pointer-events: none;
+}
+
+.game-layout__story-visible {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.game-layout__story-body p {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.game-layout__story-body p + p {
+  margin-top: 0;
 }
 
 .game-layout__story p {

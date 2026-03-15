@@ -1,10 +1,16 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, Fragment } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import type { Case } from "@/types/database";
+
+const STORY_MODAL_SEEN_KEY = "detective-game-story-modal-seen-";
+const CLUES_STORAGE_KEY = "detective-game-clues-";
+const MAX_CLUES = 6;
+const MAX_WORDS_PER_CLUE = 10;
+const CLUE_DISPLAY_CHARS = 36;
 
 type SuspectWithTestimony = {
   id: string;
@@ -39,6 +45,42 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+/** Обрізати текст до max слів */
+function trimToWords(text: string, maxWords: number): string {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  return words.slice(0, maxWords).join(" ");
+}
+
+/** Розбити видимий текст на сегменти для підсвітки зачіпок */
+function getStorySegments(
+  visibleText: string,
+  clueList: string[]
+): { type: "text" | "highlight"; text: string }[] {
+  const segments: { type: "text" | "highlight"; text: string }[] = [];
+  let remaining = visibleText;
+  while (remaining.length > 0) {
+    let earliest = remaining.length;
+    let whichClue = -1;
+    for (let i = 0; i < clueList.length; i++) {
+      const idx = remaining.indexOf(clueList[i]);
+      if (idx >= 0 && idx < earliest) {
+        earliest = idx;
+        whichClue = i;
+      }
+    }
+    if (whichClue < 0) {
+      segments.push({ type: "text", text: remaining });
+      break;
+    }
+    if (earliest > 0) {
+      segments.push({ type: "text", text: remaining.slice(0, earliest) });
+    }
+    segments.push({ type: "highlight", text: clueList[whichClue] });
+    remaining = remaining.slice(earliest + clueList[whichClue].length);
+  }
+  return segments;
+}
+
 /** Фото за статтю та віком: чоловік <50 → img1, чоловік ≥50 → img2, жінка <50 → img3, жінка ≥50 → img4 */
 function getPlaceholderImage(s: { gender: string; age: number }): string {
   const isMale = s.gender === "male";
@@ -67,6 +109,10 @@ export default function GamePage() {
   const [storyTypedLength, setStoryTypedLength] = useState(0);
   const [storyTypewriterDone, setStoryTypewriterDone] = useState(false);
   const storyTypewriterStarted = useRef(false);
+  const [storyModalOpen, setStoryModalOpen] = useState(false);
+  const [clues, setClues] = useState<string[]>([]);
+  const [viewCluesModalOpen, setViewCluesModalOpen] = useState(false);
+  const storyModalContentRef = useRef<HTMLDivElement>(null);
 
   const updateScrollArrows = useCallback(() => {
     const el = cardsScrollRef.current;
@@ -95,6 +141,46 @@ export default function GamePage() {
     const step = el.clientWidth * 0.85;
     el.scrollBy({ left: direction === "left" ? -step : step, behavior: "smooth" });
   }
+
+  function closeStoryModal() {
+    if (caseId && typeof window !== "undefined") {
+      sessionStorage.setItem(STORY_MODAL_SEEN_KEY + caseId, "1");
+    }
+    setStoryModalOpen(false);
+  }
+
+  function addClueFromSelection() {
+    if (typeof window === "undefined") return;
+    const sel = window.getSelection();
+    const text = sel?.toString?.()?.trim();
+    if (!text || clues.length >= MAX_CLUES) return;
+    const trimmed = trimToWords(text, MAX_WORDS_PER_CLUE);
+    if (!trimmed) return;
+    if (clues.some((c) => c === trimmed)) return;
+    setClues((prev) => [...prev, trimmed].slice(0, MAX_CLUES));
+    sel?.removeAllRanges?.();
+  }
+
+  // Відкрити модалку справи при першому заході на справу; завантажити зачіпки з sessionStorage
+  useEffect(() => {
+    if (!caseId || typeof window === "undefined") return;
+    const seen = sessionStorage.getItem(STORY_MODAL_SEEN_KEY + caseId);
+    if (!seen) setStoryModalOpen(true);
+    try {
+      const raw = sessionStorage.getItem(CLUES_STORAGE_KEY + caseId);
+      if (raw) {
+        const parsed = JSON.parse(raw) as string[];
+        if (Array.isArray(parsed)) setClues(parsed.slice(0, MAX_CLUES));
+      }
+    } catch {
+      // ignore
+    }
+  }, [caseId]);
+
+  useEffect(() => {
+    if (!caseId || typeof window === "undefined") return;
+    sessionStorage.setItem(CLUES_STORAGE_KEY + caseId, JSON.stringify(clues));
+  }, [caseId, clues]);
 
   useEffect(() => {
     if (!caseId) return;
@@ -137,14 +223,10 @@ export default function GamePage() {
     const parts = [
       gameCase.intro_text,
       gameCase.body_location,
-      `Експертиза встановила: ${gameCase.tool_description}`,
-      `На місці знайдено: ${gameCase.evidence_description}`,
+      gameCase.tool_description,
+      gameCase.evidence_description,
     ].filter(Boolean);
-    const full = parts
-      .map((p) => p.replace(/\.+\s*$/, "").trim())
-      .join(". ")
-      .replace(/;\s*/g, ". ")
-      .replace(/\.{2,}/g, ".");
+    const full = parts.map((p) => p.trim()).join("\n\n");
     const key = CASE_STORY_TYPED_KEY + caseId;
     if (typeof window !== "undefined" && window.sessionStorage.getItem(key) === "1") {
       setStoryTypedLength(full.length);
@@ -232,6 +314,18 @@ export default function GamePage() {
     }
   }
 
+  const storyParagraphs = gameCase
+    ? [
+        gameCase.intro_text,
+        gameCase.body_location,
+        gameCase.tool_description,
+        gameCase.evidence_description,
+      ].filter(Boolean)
+    : [];
+  const fullStory = storyParagraphs.map((p) => String(p).trim()).join("\n\n");
+  const visibleStory = fullStory.slice(0, storyTypedLength);
+  const storySegments = getStorySegments(visibleStory, clues);
+
   if (loading) {
     return (
       <div className="block-gif min-h-screen flex items-center justify-center">
@@ -250,24 +344,82 @@ export default function GamePage() {
     );
   }
 
-  const parts = [
-    gameCase.intro_text,
-    gameCase.body_location,
-    `Експертиза встановила: ${gameCase.tool_description}`,
-    `На місці знайдено: ${gameCase.evidence_description}`,
-  ].filter(Boolean);
-
-  const fullStory = parts
-    .map((p) => p.replace(/\.+\s*$/, "").trim())
-    .join(". ")
-    .replace(/;\s*/g, ". ")
-    .replace(/\.{2,}/g, ".");
-
   return (
     <div className="block-gif game-page">
+      {storyModalOpen && (
+        <div className="story-modal-overlay" role="dialog" aria-labelledby="story-modal-title">
+          <div className="story-modal-box" ref={storyModalContentRef}>
+            <h2 id="story-modal-title" className="story-modal-title">
+              СПРАВА
+            </h2>
+            <div
+              className="story-modal-scroll"
+              onMouseUp={addClueFromSelection}
+              role="article"
+            >
+              <div className="story-modal-body white-space-pre-line">
+                {storySegments.map((seg, i) =>
+                  seg.type === "text" ? (
+                    <Fragment key={i}>{seg.text}</Fragment>
+                  ) : (
+                    <mark key={i} className="story-clue-highlight">
+                      {seg.text}
+                    </mark>
+                  )
+                )}
+                {!storyTypewriterDone && (
+                  <span className="game-story-typewriter-cursor" aria-hidden="true" />
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={closeStoryModal}
+              className="story-modal-close"
+            >
+              Закрити
+            </button>
+          </div>
+        </div>
+      )}
+
+      {viewCluesModalOpen && (
+        <div className="story-modal-overlay" role="dialog" aria-label="Перегляд зачіпок">
+          <div className="view-clues-modal-box">
+            <h2 className="story-modal-title">Зачіпки</h2>
+            <ul className="view-clues-list">
+              {clues.map((clue, i) => (
+                <li key={i}>
+                  <span className="view-clue-item" title={clue}>
+                    {clue}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              onClick={() => setViewCluesModalOpen(false)}
+              className="story-modal-close"
+            >
+              Закрити
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="game-header-row">
-        <div className="game-suspect-count" aria-live="polite">
-          Підозрюваних: {suspects.length}
+        <div className="game-header-left">
+          <div className="game-suspect-count" aria-live="polite">
+            Підозрюваних: {suspects.length}
+          </div>
+          <button
+            type="button"
+            onClick={() => setStoryModalOpen(true)}
+            className="game-btn-sprava"
+            aria-label="Відкрити текст справи"
+          >
+            Справа
+          </button>
         </div>
         {timeLeft !== null && result === null && (
           <div className="game-timer" aria-live="polite">
@@ -277,13 +429,25 @@ export default function GamePage() {
       </div>
 
       <main className="game-layout">
-        <section className="game-layout__story">
-          <p>
-            {fullStory.slice(0, storyTypedLength)}
-            {!storyTypewriterDone && (
-              <span className="game-story-typewriter-cursor" aria-hidden="true" />
+        <section className="game-clues-block" aria-label="Зачіпки">
+          <div className="game-clues-inner">
+            {clues.length === 0 ? (
+              <p className="game-clues-placeholder">
+                Виділіть фрази в тексті справи (кнопка «Справа»), щоб додати зачіпки. Макс. 6 зачіпок, до 10 слів у кожній.
+              </p>
+            ) : (
+              clues.map((clue, i) => (
+                <button
+                  key={`${i}-${clue.slice(0, 8)}`}
+                  type="button"
+                  onClick={() => setViewCluesModalOpen(true)}
+                  className="game-clue-chip"
+                >
+                  {clue.length > CLUE_DISPLAY_CHARS ? clue.slice(0, CLUE_DISPLAY_CHARS) + "…" : clue}
+                </button>
+              ))
             )}
-          </p>
+          </div>
         </section>
 
         <div className="game-layout__cards-wrap">

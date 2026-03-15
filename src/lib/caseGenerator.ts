@@ -202,6 +202,118 @@ function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/** Додає крапку в кінці речення, якщо її немає. */
+function ensureEndDot(s: string): string {
+  const t = s.trim();
+  if (!t) return "";
+  return /[.?!]$/.test(t) ? t : t + ".";
+}
+
+/** Для вплетення в речення: перша літера мала (наприклад «обставини — отрута в організмі»). */
+function embedLowerCase(s: string): string {
+  const t = s.trim();
+  if (!t) return "";
+  return t.charAt(0).toLowerCase() + t.slice(1);
+}
+
+/**
+ * Генерує одну цілісну детективну сцену з фрагментів.
+ * Правила: зв’язний художній текст, без механічного склеювання, без повторів і канцеляризмів.
+ * Повертає 1–3 абзаци в стилі уривка з детективного роману.
+ */
+function buildStoryParagraphs(
+  introText: string,
+  placeText: string,
+  bodyLocationText: string,
+  weaponText: string,
+  evidenceText: string
+): [string, string, string, string] {
+  const intro = introText.trim();
+  const place = placeText.trim();
+  const weapon = weaponText.trim();
+  const evidence = evidenceText.trim();
+
+  // Нормалізуємо: один раз використовуємо кожен факт, уніфікуємо крапки
+  const introNorm = ensureEndDot(intro);
+  const placeNorm = ensureEndDot(place);
+  const weaponNorm = ensureEndDot(weapon);
+  const evidenceNorm = ensureEndDot(evidence);
+
+  // Варіанти першого абзацу: подія й знахідка (одна сцена, без дублів)
+  const discoveryParagraphs = [
+    () => {
+      // Інтро вже містить хто/де/коли — обгортаємо в атмосферу
+      const lead = pick([
+        "Того вечора в приміщенні було тихо, робочий день щойно закінчився.",
+        "Того вечора там ще приймали відвідувачів, зміна працювала до закриття.",
+        "Свідки згадують той вечір уривками — кроки, приглушені голоси.",
+      ]);
+      return `${lead} ${introNorm}`;
+    },
+    () => {
+      return `${introNorm} Поліцію викликали одразу; сцену зафіксували до прибуття експертів.`;
+    },
+    () => introNorm,
+  ];
+
+  // Другий абзац: місце події й висновки експертизи (одна думка, без "за цими даними працюють експерти")
+  const sceneAndExpertParagraphs = [
+    () => {
+      if (!placeNorm && !weaponNorm) return "";
+      const parts: string[] = [];
+      if (placeNorm) parts.push(`При огляді зафіксували приміщення: ${placeNorm}`);
+      if (weaponNorm) parts.push(`Патологоанатоми та слідчі експерти попередньо встановили обставини смерті — ${embedLowerCase(weaponNorm)}`);
+      return parts.join(". ");
+    },
+    () => {
+      if (!weaponNorm) return placeNorm ? `Місце події: ${placeNorm}` : "";
+      return `${placeNorm ? `Обстановка на місці — ${placeNorm}. ` : ""}За висновками експертів, ${embedLowerCase(weaponNorm)}`;
+    },
+    () => {
+      const placePart = placeNorm ? `Опис місця зводиться до такого: ${placeNorm}. ` : "";
+      const expertPart = weaponNorm ? `Експертиза тіла та предметів із сцени дала попередні відповіді — ${embedLowerCase(weaponNorm)}` : "";
+      return (placePart + expertPart).trim();
+    },
+  ];
+
+  // Третій абзац: речові докази і логічне закриття сцени (без шаблонних фраз)
+  const evidenceParagraphs = [
+    () => {
+      if (!evidenceNorm) return "Показання тих, хто був на місці, зіставляють із знахідками.";
+      return `${evidenceNorm} Алібі присутніх перевіряють за цими фактами.`;
+    },
+    () => {
+      if (!evidenceNorm) return "Слідство зіставляє свідчення з тим, що зафіксовано на місці.";
+      return `На місці залишились сліди: ${embedLowerCase(evidenceNorm)} Показання та алібі тепер зводять у єдину картину.`;
+    },
+    () => {
+      if (!evidenceNorm) return "";
+      return `Крім того, під час огляду знайшли таке: ${embedLowerCase(evidenceNorm)} Це лягло в основу порівняння з показаннями.`;
+    },
+  ];
+
+  const p1 = pick(discoveryParagraphs)();
+  let p2 = pick(sceneAndExpertParagraphs)();
+  let p3 = pick(evidenceParagraphs)();
+
+  // Якщо другий абзац вийшов порожнім (немає place і weapon), об'єднуємо логіку в один абзац або залишаємо тільки evidence
+  if (!p2 && p3) {
+    p2 = p3;
+    p3 = "";
+  } else if (!p2) {
+    p2 = "Показання тих, хто був на місці події, зіставляють із зафіксованими обставинами.";
+  }
+
+  if (!p3.trim()) p3 = "";
+
+  return [
+    ensureEndDot(p1),
+    ensureEndDot(p2),
+    ensureEndDot(p3),
+    "",
+  ];
+}
+
 /** Обирає свідчення за статтю персонажа, щоб не перемішувати (чоловік не каже «я була»). */
 function pickTestimony(suspect: Suspect, isKiller: boolean): string {
   const isMale = suspect.gender === "male";
@@ -306,11 +418,19 @@ export function buildCaseFromParts(
   const motive = pick(isMale ? MOTIVES_MALE : MOTIVES_FEMALE);
   const confession = pick(isMale ? CONFESSIONS_MALE : CONFESSIONS_FEMALE);
 
+  const [para1, para2, para3, para4] = buildStoryParagraphs(
+    intro.text,
+    place.text,
+    bodyLocation.text,
+    weapon.text,
+    evidenceDescription
+  );
+
   const caseData: GeneratedCase = {
-    intro_text: intro.text,
-    body_location: bodyLocation.text,
-    tool_description: weapon.text,
-    evidence_description: evidenceDescription,
+    intro_text: para1,
+    body_location: para2,
+    tool_description: para3,
+    evidence_description: para4,
     difficulty,
     killer_id: killer.id,
     motive,
